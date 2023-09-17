@@ -1,0 +1,46 @@
+version: '3'
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: container/Dockerfile.frontend
+    volumes:
+      - ./frontend:/var/www/frontend
+    ports:
+      - 3000:3000
+    tty: true
+    # command: ["npm", "run", "start"]
+    depends_on:
+      - backend
+  backend:
+    build: .
+    image: golang:1.21.0
+    volumes:
+      - ./backend/app:/go/src
+    expose:
+      - 80
+    tty: true
+    depends_on:
+      - db
+      - redis
+  auth:
+    build: .
+    image: golang:1.21.0
+    volumes:
+      - ./backend/auth:/go/src
+    expose:
+      - 80
+    tty: true
+    depends_on:
+      - redis
+  db:
+    image: postgres
+    expose:
+      - 5432
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+  redis:
+    image: redis:latest
+    expose:
+      - 6379
